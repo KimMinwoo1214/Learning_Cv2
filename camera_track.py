@@ -23,7 +23,6 @@ while True:
     # img_canny = cv2.Canny(cam_blur, 10, high_t )
 
     cv2.imshow("frame", frame)
-
     
     if cv2.waitKey(10) & 0xff == ord('q'):
         break

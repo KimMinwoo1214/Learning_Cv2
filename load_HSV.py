@@ -1,19 +1,19 @@
 import cv2
 import numpy as np
-
-def callBack(val):
-    pass
+import os
 
 # 웹캠 캡처 시작
 cap = cv2.VideoCapture(0)
 
-cv2.namedWindow("Change HSV")
-cv2.createTrackbar('low_H', 'Change HSV', 0, 179, callBack)
-cv2.createTrackbar('high_H', 'Change HSV', 179, 179, callBack)
-cv2.createTrackbar('low_S', 'Change HSV', 0, 255, callBack)
-cv2.createTrackbar('high_S', 'Change HSV', 255, 255, callBack)
-cv2.createTrackbar('low_V', 'Change HSV', 0, 255, callBack)
-cv2.createTrackbar('high_V', 'Change HSV', 255, 255, callBack)
+# 트랙바 초기값을 설정하기 위해 파일이 있는지 확인
+if os.path.exists("HSV_detect.npy"):
+    hsv = np.load("HSV_detect.npy", allow_pickle=True)
+    low = hsv[0]
+    high = hsv[1]
+    
+else:
+    low = np.array([0, 0, 0])
+    high = np.array([179, 255, 255])
 
 while True:
     ret, frame = cap.read()
@@ -22,17 +22,6 @@ while True:
 
     # BGR에서 HSV로 변환
     hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
-    # 트랙바에서 값 가져오기
-    low_H = cv2.getTrackbarPos('low_H', 'Change HSV')
-    high_H = cv2.getTrackbarPos('high_H', 'Change HSV')
-    low_S = cv2.getTrackbarPos('low_S', 'Change HSV')
-    high_S = cv2.getTrackbarPos('high_S', 'Change HSV')
-    low_V = cv2.getTrackbarPos('low_V', 'Change HSV')
-    high_V = cv2.getTrackbarPos('high_V', 'Change HSV')
-
-    low = np.array([low_H, low_S, low_V])
-    high = np.array([high_H, high_S, high_V])
 
     # 마스크 생성
     mask = cv2.inRange(hsv_frame, low, high)
@@ -58,13 +47,9 @@ while True:
     cv2.imshow("Masking", bitwise_and)
     cv2.imshow("Original with Contours", frame)
     
-    if cv2.waitKey(10) & 0xff == ord('q'):
+    key = cv2.waitKey(10) & 0xff
+    if key == ord('q'):
         break
-    
-    if cv2.waitKey(10) & 0xff == ord('s'):
-        hsv = [low, high]
-        np.save("HSV_detect", hsv)
-        print("Save successful")
-        
+
 cap.release()
 cv2.destroyAllWindows()

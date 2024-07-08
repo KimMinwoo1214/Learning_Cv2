@@ -47,7 +47,6 @@
 # cap.release()
 # cv2.destroyAllWindows()
 
-
 import cv2
 import numpy as np
 
@@ -67,11 +66,9 @@ def pair_eyes(eyes):
     return paired_eyes
 
 def overlay_image_alpha(img, img_overlay, x, y, alpha_mask):
-    # Image ranges
     y1, y2 = max(0, y), min(img.shape[0], y + img_overlay.shape[0])
     x1, x2 = max(0, x), min(img.shape[1], x + img_overlay.shape[1])
 
-    # Overlay ranges
     y1o, y2o = max(0, -y), min(img_overlay.shape[0], img.shape[0] - y)
     x1o, x2o = max(0, -x), min(img_overlay.shape[1], img.shape[1] - x)
 
@@ -79,19 +76,16 @@ def overlay_image_alpha(img, img_overlay, x, y, alpha_mask):
     if y1 >= y2 or x1 >= x2 or y1o >= y2o or x1o >= x2o:
         return
 
-    # Blend overlay within the determined ranges
     img_crop = img[y1:y2, x1:x2]
     img_overlay_crop = img_overlay[y1o:y2o, x1o:x2o]
     alpha = alpha_mask[y1o:y2o, x1o:x2o, None]
 
     img_crop[:] = alpha * img_overlay_crop + (1 - alpha) * img_crop
 
-# 카메라 준비
 cap = cv2.VideoCapture(0)
 face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 eye_cascade = cv2.CascadeClassifier('haarcascade_eye.xml')
 
-# 선글라스 이미지 로드
 sunglass_img = cv2.imread('sunglass.png', cv2.IMREAD_UNCHANGED)
 
 while True:
@@ -122,11 +116,9 @@ while True:
             # 선글라스 이미지 크기 조정
             sunglass_resized = cv2.resize(sunglass_img, (bottom_right_x - top_left_x, bottom_right_y - top_left_y))
 
-            # 알파 채널 분리
             alpha_s = sunglass_resized[:, :, 3] / 255.0
             sunglass_resized = sunglass_resized[:, :, :3]
 
-            # 선글라스 오버레이
             overlay_image_alpha(roi_color, sunglass_resized, top_left_x, top_left_y, alpha_s)
 
     cv2.imshow("Video", frame)
